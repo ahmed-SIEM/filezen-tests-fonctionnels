@@ -19,7 +19,7 @@ module.exports = defineConfig({
   ],
 
   use: {
-    baseURL: process.env.FRONTEND_URL || 'http://localhost:5174',
+    baseURL: process.env.FRONTEND_URL || 'http://localhost:5173',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'on-first-retry',
@@ -39,7 +39,7 @@ module.exports = defineConfig({
       testMatch: '**/e2e/ui/**/*.spec.js',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: process.env.FRONTEND_URL || 'http://localhost:5174',
+        baseURL: process.env.FRONTEND_URL || 'http://localhost:5173',
       },
     },
     {
@@ -47,7 +47,7 @@ module.exports = defineConfig({
       testMatch: '**/e2e/ui/**/*.spec.js',
       use: {
         ...devices['Desktop Firefox'],
-        baseURL: process.env.FRONTEND_URL || 'http://localhost:5174',
+        baseURL: process.env.FRONTEND_URL || 'http://localhost:5173',
       },
     },
     {
@@ -55,7 +55,7 @@ module.exports = defineConfig({
       testMatch: '**/e2e/ui/**/*.spec.js',
       use: {
         ...devices['Pixel 5'],
-        baseURL: process.env.FRONTEND_URL || 'http://localhost:5174',
+        baseURL: process.env.FRONTEND_URL || 'http://localhost:5173',
       },
     },
   ],

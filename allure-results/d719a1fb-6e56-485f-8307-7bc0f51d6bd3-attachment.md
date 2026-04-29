@@ -1,0 +1,163 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: ui\dashboard.ui.spec.js >> IHM — SuperAdmin Detail Etablissement >> [UI-DASH-016] /superadmin/establishments/:id non connecte → redirection login
+- Location: tests\e2e\ui\dashboard.ui.spec.js:151:3
+
+# Error details
+
+```
+Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5174/superadmin/establishments/507f1f77bcf86cd799439011
+Call log:
+  - navigating to "http://localhost:5174/superadmin/establishments/507f1f77bcf86cd799439011", waiting until "load"
+
+```
+
+# Test source
+
+```ts
+  53  |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  54  |     const url = page.url();
+  55  |     expect(url).toMatch(/login|\/$|accueil/i);
+  56  |   });
+  57  | 
+  58  |   test('[UI-DASH-006] /superadmin/establishments non connecte → redirection', async ({ page }) => {
+  59  |     await page.goto(`${FRONTEND_URL}/superadmin/establishments`);
+  60  |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  61  |     const url = page.url();
+  62  |     expect(url).toMatch(/login|\/$|accueil/i);
+  63  |   });
+  64  | 
+  65  |   test('[UI-DASH-007] /superadmin/validate non connecte → redirection', async ({ page }) => {
+  66  |     await page.goto(`${FRONTEND_URL}/superadmin/validate`);
+  67  |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  68  |     const url = page.url();
+  69  |     expect(url).toMatch(/login|\/$|accueil/i);
+  70  |   });
+  71  | });
+  72  | 
+  73  | // ─── Dashboard Citoyen ────────────────────────────────────────────────────────
+  74  | test.describe('IHM — Dashboard Citoyen (acces non autorise)', () => {
+  75  | 
+  76  |   test('[UI-DASH-008] /citoyen/dashboard non connecte → redirection', async ({ page }) => {
+  77  |     await page.goto(`${FRONTEND_URL}/citoyen/dashboard`);
+  78  |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  79  |     const url = page.url();
+  80  |     expect(url).toMatch(/login|\/$|accueil|citoyen/i);
+  81  |   });
+  82  | 
+  83  |   test('[UI-DASH-009] /citoyen/mes-rdv non connecte → redirection', async ({ page }) => {
+  84  |     await page.goto(`${FRONTEND_URL}/citoyen/mes-rdv`);
+  85  |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  86  |     const url = page.url();
+  87  |     expect(url).toMatch(/login|\/$|accueil|citoyen/i);
+  88  |   });
+  89  | 
+  90  |   test('[UI-DASH-010] /citoyen/notifications non connecte → redirection', async ({ page }) => {
+  91  |     await page.goto(`${FRONTEND_URL}/citoyen/notifications`);
+  92  |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  93  |     const url = page.url();
+  94  |     expect(url).toMatch(/login|\/$|accueil|citoyen/i);
+  95  |   });
+  96  | });
+  97  | 
+  98  | // ─── Formulaire inscription etablissement ───────────────────────────────────
+  99  | test.describe('IHM — Inscription etablissement', () => {
+  100 | 
+  101 |   test('[UI-DASH-011] Page inscription etablissement accessible', async ({ page }) => {
+  102 |     await page.goto(`${FRONTEND_URL}/signup/etablissement`);
+  103 |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  104 |     // La page doit charger (meme si elle redirige)
+  105 |     const body = page.locator('body');
+  106 |     await expect(body).not.toBeEmpty();
+  107 |   });
+  108 | 
+  109 |   test('[UI-DASH-012] Formulaire inscription etab contient champs nom et email', async ({ page }) => {
+  110 |     await page.goto(`${FRONTEND_URL}/signup/etablissement`);
+  111 |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  112 | 
+  113 |     const emailField = page.locator('input[type="email"], input[name="email_etablissement"]').first();
+  114 |     const count = await emailField.count();
+  115 |     if (count > 0) {
+  116 |       await expect(emailField).toBeVisible({ timeout: TIMEOUT });
+  117 |     }
+  118 |   });
+  119 | });
+  120 | 
+  121 | // ─── Performance et accessibilite ────────────────────────────────────────────
+  122 | test.describe('IHM — Performance et robustesse', () => {
+  123 | 
+  124 |   test('[UI-DASH-013] Page login charge en moins de 5 secondes', async ({ page }) => {
+  125 |     const start = Date.now();
+  126 |     await page.goto(`${FRONTEND_URL}/login`);
+  127 |     await page.waitForLoadState('domcontentloaded');
+  128 |     const duration = Date.now() - start;
+  129 |     expect(duration).toBeLessThan(5000);
+  130 |   });
+  131 | 
+  132 |   test('[UI-DASH-014] Page accueil charge en moins de 5 secondes', async ({ page }) => {
+  133 |     const start = Date.now();
+  134 |     await page.goto(FRONTEND_URL);
+  135 |     await page.waitForLoadState('domcontentloaded');
+  136 |     const duration = Date.now() - start;
+  137 |     expect(duration).toBeLessThan(5000);
+  138 |   });
+  139 | 
+  140 |   test('[UI-DASH-015] Viewport tablet fonctionne sur page login', async ({ page }) => {
+  141 |     await page.setViewportSize({ width: 768, height: 1024 });
+  142 |     const res = await page.goto(`${FRONTEND_URL}/login`);
+  143 |     expect(res?.status()).toBeLessThan(400);
+  144 |     await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: TIMEOUT });
+  145 |   });
+  146 | });
+  147 | 
+  148 | // ─── Page detail etablissement (Super Admin) ──────────────────────────────────
+  149 | test.describe('IHM — SuperAdmin Detail Etablissement', () => {
+  150 | 
+  151 |   test('[UI-DASH-016] /superadmin/establishments/:id non connecte → redirection login', async ({ page }) => {
+  152 |     const fakeId = '507f1f77bcf86cd799439011';
+> 153 |     await page.goto(`${FRONTEND_URL}/superadmin/establishments/${fakeId}`);
+      |                ^ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5174/superadmin/establishments/507f1f77bcf86cd799439011
+  154 |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  155 |     const url = page.url();
+  156 |     expect(url).toMatch(/login|\/$|accueil/i);
+  157 |   });
+  158 | 
+  159 |   test('[UI-DASH-017] Page detail etablissement avec ID inexistant gere proprement', async ({ page }) => {
+  160 |     const fakeId = '507f1f77bcf86cd799439011';
+  161 |     await page.goto(`${FRONTEND_URL}/superadmin/establishments/${fakeId}`);
+  162 |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  163 |     // Soit redirection login, soit page d'erreur geree — pas de crash serveur
+  164 |     const body = page.locator('body');
+  165 |     await expect(body).not.toBeEmpty();
+  166 |   });
+  167 | 
+  168 |   test('[UI-DASH-018] Pas de crash JavaScript sur page detail etablissement superadmin', async ({ page }) => {
+  169 |     const errors = [];
+  170 |     page.on('pageerror', err => errors.push(err.message));
+  171 |     const fakeId = '507f1f77bcf86cd799439011';
+  172 |     await page.goto(`${FRONTEND_URL}/superadmin/establishments/${fakeId}`);
+  173 |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  174 |     const criticalErrors = errors.filter(e =>
+  175 |       !e.includes('favicon') &&
+  176 |       !e.includes('404') &&
+  177 |       !e.includes('net::ERR') &&
+  178 |       !e.includes('ChunkLoad')
+  179 |     );
+  180 |     expect(criticalErrors).toHaveLength(0);
+  181 |   });
+  182 | 
+  183 |   test('[UI-DASH-019] Route superadmin establishments liste non connecte → redirection', async ({ page }) => {
+  184 |     await page.goto(`${FRONTEND_URL}/superadmin/establishments`);
+  185 |     await page.waitForLoadState('networkidle', { timeout: TIMEOUT }).catch(() => {});
+  186 |     const url = page.url();
+  187 |     expect(url).toMatch(/login|\/$|accueil/i);
+  188 |   });
+  189 | });
+  190 | 
+```

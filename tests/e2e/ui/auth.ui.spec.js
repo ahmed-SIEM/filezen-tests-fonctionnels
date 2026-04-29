@@ -4,13 +4,13 @@
  *
  * Pré-requis :
  *   - Backend démarré sur http://localhost:5000
- *   - Frontend démarré sur http://localhost:5174
+ *   - Frontend démarré sur http://localhost:5173
  * Commande : npm run test:e2e:ui
  */
 
 const { test, expect } = require('@playwright/test');
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5174';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const TIMEOUT_PAGE = 10000; // 10 secondes max par action
 
 // ─── Inscription citoyen ──────────────────────────────────────────────────────

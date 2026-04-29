@@ -4,13 +4,13 @@
  *
  * Pre-requis :
  *   - Backend demarre sur http://localhost:5000
- *   - Frontend demarre sur http://localhost:5174
+ *   - Frontend demarre sur http://localhost:5173
  * Commande : npm run test:e2e:ui
  */
 
 const { test, expect } = require('@playwright/test');
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5174';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const TIMEOUT = 10000;
 
 // ─── Page de recherche etablissements ────────────────────────────────────────

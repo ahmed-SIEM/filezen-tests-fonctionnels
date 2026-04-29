@@ -17,7 +17,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const FRONT = process.env.FRONTEND_URL || 'http://localhost:5174';
+const FRONT = process.env.FRONTEND_URL || 'http://localhost:5173';
 const API   = process.env.API_URL       || 'http://localhost:5000';
 const WAIT  = 8000;
 const SHORT = 3000;

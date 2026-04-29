@@ -16,14 +16,21 @@ module.exports = {
   // ── Reporters : console + Allure ──────────────────────────────────────────
   reporters: [
     'default',
-    [
-      'allure-jest',
-      {
-        resultsDir: 'allure-results',
-        testMode: true,
-      },
-    ],
   ],
+
+  // ── Allure : via testEnvironment (allure-jest v3) ─────────────────────────
+  testEnvironment: 'allure-jest/node',
+  testEnvironmentOptions: {
+    resultsDir: 'allure-results',
+  },
+
+  // ── Résolution des chemins vers le Backend ────────────────────────────────
+  moduleNameMapper: {
+    '^../../Backend/(.*)$':   '<rootDir>/../Backend/$1',
+    '^../../../Backend/(.*)$': '<rootDir>/../Backend/$1',
+    // Forcer une seule instance mongoose partagée entre tests et Backend
+    '^mongoose$': '<rootDir>/../Backend/node_modules/mongoose',
+  },
 
   // ── Couverture de code ─────────────────────────────────────────────────────
   collectCoverageFrom: [
