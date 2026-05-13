@@ -447,6 +447,14 @@ test.describe('📅 SCÉNARIO 2 — Parcours complet Rendez-vous', () => {
       r.fulfill({ status: 200, contentType: 'application/json',
         body: JSON.stringify({ success: true, data: [] }) }));
 
+    // Mocks agent (même routes que SC-TICKET)
+    await page.route(`${API}/api/tickets/agent/file*`, r =>
+      r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ success: true, data: FILE_AVEC_TICKETS }) }));
+    await page.route(`${API}/api/tickets/agent/stats*`, r =>
+      r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ success: true, data: { servis: 5, no_show: 0, temps_moyen_minutes: 15 } }) }));
+
     await page.route(`${API}/api/rendezvous/agent/planning*`, r =>
       r.fulfill({ status: 200, contentType: 'application/json',
         body: JSON.stringify({ success: true, data: [rdvTermine ? { ...RDV_CONFIRME, statut: 'termine' } : rdvEnCours ? { ...RDV_CONFIRME, statut: 'en_cours' } : RDV_CONFIRME] }) }));
@@ -742,6 +750,11 @@ test.describe('🏛️ SCÉNARIO 3 — Cycle de vie établissement (Admin & Supe
 
     // ── ÉTAPE 5 : Créer service RDV ───────────────────────────────────────────
     await _step('Étape 5 — Admin crée le service "Consultation Spécialisée" avec RDV', async () => {
+      // Recharger la page pour fermer toute modal encore ouverte de l'étape 4
+      await page.goto(`${FRONT}/admin/services`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+      await page.waitForLoadState('networkidle', { timeout: WAIT }).catch(() => {});
+      await page.waitForTimeout(800);
+
       const btnAjouter = page.locator('button:has-text("Ajouter"), button:has-text("Nouveau"), button:has-text("+")').first();
 
       if (await btnAjouter.isVisible({ timeout: SHORT }).catch(() => false)) {
