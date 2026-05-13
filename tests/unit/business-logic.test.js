@@ -14,75 +14,34 @@ jest.mock('../../Backend/src/utils/socket', () => ({
   getIO: jest.fn(() => ({ to: jest.fn(() => ({ emit: jest.fn() })) })),
 }));
 
-// ─── Fonctions pures extraites pour test unitaire ─────────────────────────────
+// ─── Import depuis le vrai fichier backend (génère la couverture réelle) ──────
+const {
+  genererSlotsHoraires,
+  formatTunisianPhone,
+  calculerTempsAttente,
+  validerMotDePasse,
+} = require('../../Backend/src/utils/business-logic');
 
-// Génération de créneaux (même logique que le backend)
-function genererSlotsHoraires(heureDebut, heureFin, dureeMinutes, pauseDebut = null, pauseFin = null) {
-  const toMin = (h) => {
-    const [hh, mm] = h.split(':').map(Number);
-    return hh * 60 + mm;
-  };
-  const toHeure = (min) => {
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  };
-
-  const debut = toMin(heureDebut);
-  const fin = toMin(heureFin);
-  const pauseD = pauseDebut ? toMin(pauseDebut) : null;
-  const pauseF = pauseFin ? toMin(pauseFin) : null;
-
-  const slots = [];
-  let cursor = debut;
-
-  while (cursor + dureeMinutes <= fin) {
-    const slotFin = cursor + dureeMinutes;
-    // Sauter si le slot chevauche la pause
-    if (pauseD !== null && pauseF !== null) {
-      if (cursor < pauseF && slotFin > pauseD) {
-        cursor = pauseF;
-        continue;
-      }
-    }
-    slots.push({ heure_debut: toHeure(cursor), heure_fin: toHeure(slotFin) });
-    cursor = slotFin;
-  }
-  return slots;
-}
-
-// Formatage numéro tunisien WhatsApp
-function formatTunisianPhone(phone) {
-  if (!phone) return null;
-  const clean = phone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
-  let number = '';
-  if (clean.startsWith('+216')) number = clean.slice(1);
-  else if (clean.startsWith('216')) number = clean;
-  else if (clean.length === 8) number = `216${clean}`;
-  else return null;
-  return `${number}@c.us`;
-}
-
-// Calcul du temps d'attente estimé
-function calculerTempsAttente(position, tempsMoyenMinutes) {
-  if (position <= 0) return 0;
-  return position * tempsMoyenMinutes;
-}
-
-// Validation mot de passe
-function validerMotDePasse(mdp) {
-  if (!mdp || mdp.length < 6) return false;
-  return true;
-}
+const { withAllureLabels } = require('../setup/allure-labels');
+let _step;
+try { _step = require('allure-js-commons').step; } catch(_) { _step = async (_n, fn) => fn && fn(); }
 
 // ─── SUITE 1 : Génération de créneaux horaires ───────────────────────────────
 describe('[CRITIQUE] Génération créneaux horaires', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier Core', 'Génération Créneaux');
 
-  test('OK — 08:00-17:00 durée 30min sans pause → 18 créneaux', () => {
-    const slots = genererSlotsHoraires('08:00', '17:00', 30);
-    expect(slots).toHaveLength(18);
-    expect(slots[0]).toEqual({ heure_debut: '08:00', heure_fin: '08:30' });
-    expect(slots[17]).toEqual({ heure_debut: '16:30', heure_fin: '17:00' });
+  test('OK — 08:00-17:00 durée 30min sans pause → 18 créneaux', async () => {
+    let slots;
+    await _step('Étape 1 — Appel de genererSlotsHoraires(08:00, 17:00, 30)', async () => {
+      slots = genererSlotsHoraires('08:00', '17:00', 30);
+    });
+    await _step('Étape 2 — Vérifier le nombre de créneaux (attendu: 18)', async () => {
+      expect(slots).toHaveLength(18);
+    });
+    await _step('Étape 3 — Vérifier le premier et dernier créneau', async () => {
+      expect(slots[0]).toEqual({ heure_debut: '08:00', heure_fin: '08:30' });
+      expect(slots[17]).toEqual({ heure_debut: '16:30', heure_fin: '17:00' });
+    });
   });
 
   test('OK — 08:00-17:00 durée 30min avec pause 12:00-13:00 → 16 créneaux', () => {
@@ -126,6 +85,7 @@ describe('[CRITIQUE] Génération créneaux horaires', () => {
 
 // ─── SUITE 2 : Formatage numéro WhatsApp tunisien ────────────────────────────
 describe('[CRITIQUE] Formatage numéro WhatsApp tunisien', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier Core', 'Formatage WhatsApp');
 
   test('OK — numéro 8 chiffres → 21612345678@c.us', () => {
     expect(formatTunisianPhone('12345678')).toBe('21612345678@c.us');
@@ -158,6 +118,7 @@ describe('[CRITIQUE] Formatage numéro WhatsApp tunisien', () => {
 
 // ─── SUITE 3 : Calcul temps d'attente ────────────────────────────────────────
 describe('[CRITIQUE] Calcul temps d\'attente estimé', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier Core', 'Calcul Temps Attente');
 
   test('OK — 5 personnes avant, 15 min/ticket → 75 min', () => {
     expect(calculerTempsAttente(5, 15)).toBe(75);
@@ -182,6 +143,7 @@ describe('[CRITIQUE] Calcul temps d\'attente estimé', () => {
 
 // ─── SUITE 4 : Validation mot de passe ───────────────────────────────────────
 describe('[CRITIQUE] Validation mot de passe', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier Core', 'Validation Sécurité');
 
   test('OK — mot de passe 6 caractères → valide', () => {
     expect(validerMotDePasse('abc123')).toBe(true);
@@ -206,6 +168,7 @@ describe('[CRITIQUE] Validation mot de passe', () => {
 
 // ─── SUITE 5 : Continuité des créneaux ───────────────────────────────────────
 describe('[CRITIQUE] Continuité et non-chevauchement des créneaux', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier Core', 'Continuité Créneaux');
 
   test('OK — créneaux consécutifs (fin du précédent = début du suivant)', () => {
     const slots = genererSlotsHoraires('08:00', '12:00', 30);

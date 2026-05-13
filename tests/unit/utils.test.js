@@ -18,9 +18,21 @@ jest.mock('../../Backend/src/utils/whatsapp', () => ({
   sendWhatsAppMessage: jest.fn().mockResolvedValue(true),
 }));
 
+const { withAllureLabels } = require('../setup/allure-labels');
+
+// ─── Import depuis le vrai fichier backend (génère la couverture réelle) ──────
+const {
+  genererCode,
+  emailValide,
+  peutAnnuler,
+  alerteRequise,
+  dansLaFenetre,
+  calculerNbCreneaux,
+} = require('../../Backend/src/utils/business-logic');
+
 // ─── SUITE : genererCode ──────────────────────────────────────────────────────
 describe('genererCode - Generation code de verification 6 chiffres', () => {
-  const genererCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+  withAllureLabels('🔵 Tests Unitaires', 'Utilitaires', 'Génération Code');
 
   test('OK - Le code est une chaine de 6 chiffres', () => {
     const code = genererCode();
@@ -45,7 +57,7 @@ describe('genererCode - Generation code de verification 6 chiffres', () => {
 
 // ─── SUITE : Validation email format ─────────────────────────────────────────
 describe('Validation format email', () => {
-  const emailValide = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  withAllureLabels('🔵 Tests Unitaires', 'Utilitaires', 'Validation Email');
 
   test('OK - Emails valides acceptes', () => {
     const emailsValides = [
@@ -75,11 +87,7 @@ describe('Validation format email', () => {
 
 // ─── SUITE : Regles metier annulation RDV ────────────────────────────────────
 describe('Regle metier - Annulation RDV (limite 24h)', () => {
-  const peutAnnuler = (dateRdv, maintenant = new Date()) => {
-    const diffMs = new Date(dateRdv) - maintenant;
-    const diffHeures = diffMs / (1000 * 60 * 60);
-    return diffHeures > 24;
-  };
+  withAllureLabels('🔵 Tests Unitaires', 'Utilitaires', 'Règle Annulation RDV');
 
   test('OK - RDV dans 48h - annulation autorisee', () => {
     const rdvDans48h = new Date(Date.now() + 48 * 60 * 60 * 1000);
@@ -109,10 +117,7 @@ describe('Regle metier - Annulation RDV (limite 24h)', () => {
 
 // ─── SUITE : Regle metier — Seuil signalements ───────────────────────────────
 describe('Regle metier - Seuil alerte signalements (5 reports)', () => {
-  const SEUIL = 5;
-  const alerteRequise = (nbSignalements, alerteDejaEnvoyee) => {
-    return nbSignalements >= SEUIL && !alerteDejaEnvoyee;
-  };
+  withAllureLabels('🔵 Tests Unitaires', 'Utilitaires', 'Seuil Signalements');
 
   test('OK - 5 signalements, alerte non envoyee - alerte requise', () => {
     expect(alerteRequise(5, false)).toBe(true);
@@ -133,13 +138,10 @@ describe('Regle metier - Seuil alerte signalements (5 reports)', () => {
 
 // ─── SUITE : Fenetres de rappel automatique ───────────────────────────────────
 describe('Regle metier - Fenetres de rappel automatique', () => {
-  const dansLaFenetre = (dateRdv, minHeures, maxHeures, maintenant = new Date()) => {
-    const diffMs = new Date(dateRdv) - maintenant;
-    const diffHeures = diffMs / (1000 * 60 * 60);
-    return diffHeures >= minHeures && diffHeures <= maxHeures;
-  };
+  withAllureLabels('🔵 Tests Unitaires', 'Utilitaires', 'Fenêtres Rappel');
 
   describe('Rappel 24h (fenetre 23h-24h)', () => {
+    withAllureLabels('🔵 Tests Unitaires', 'Utilitaires', 'Calcul Créneaux');
     test('OK - RDV dans 23.5h - dans la fenetre 24h', () => {
       const rdv = new Date(Date.now() + 23.5 * 60 * 60 * 1000);
       expect(dansLaFenetre(rdv, 23, 24)).toBe(true);
@@ -157,6 +159,7 @@ describe('Regle metier - Fenetres de rappel automatique', () => {
   });
 
   describe('Rappel 1h (fenetre 50min-1h)', () => {
+    withAllureLabels('🔵 Tests Unitaires', 'Utilitaires');
     test('OK - RDV dans 55min - dans la fenetre 1h', () => {
       const rdv = new Date(Date.now() + 55 * 60 * 1000);
       expect(dansLaFenetre(rdv, 50 / 60, 1)).toBe(true);
@@ -171,29 +174,17 @@ describe('Regle metier - Fenetres de rappel automatique', () => {
 
 // ─── SUITE : Calcul creneaux par jour ────────────────────────────────────────
 describe('Calcul nombre de creneaux attendus par jour', () => {
-  const calculerCreneaux = (heureDebut, heureFin, dureeMinutes, pauseDebut = null, pauseFin = null) => {
-    const debut = parseInt(heureDebut.split(':')[0]) * 60 + parseInt(heureDebut.split(':')[1]);
-    const fin = parseInt(heureFin.split(':')[0]) * 60 + parseInt(heureFin.split(':')[1]);
-    let totalMinutes = fin - debut;
-
-    if (pauseDebut && pauseFin) {
-      const pd = parseInt(pauseDebut.split(':')[0]) * 60 + parseInt(pauseDebut.split(':')[1]);
-      const pf = parseInt(pauseFin.split(':')[0]) * 60 + parseInt(pauseFin.split(':')[1]);
-      totalMinutes -= (pf - pd);
-    }
-
-    return Math.floor(totalMinutes / dureeMinutes);
-  };
+  withAllureLabels('🔵 Tests Unitaires', 'Utilitaires');
 
   test('OK - 08h00-17h00, 30min, pause 12h-13h - 16 creneaux', () => {
-    expect(calculerCreneaux('08:00', '17:00', 30, '12:00', '13:00')).toBe(16);
+    expect(calculerNbCreneaux('08:00', '17:00', 30, '12:00', '13:00')).toBe(16);
   });
 
   test('OK - 09h00-12h00, 60min, sans pause - 3 creneaux', () => {
-    expect(calculerCreneaux('09:00', '12:00', 60)).toBe(3);
+    expect(calculerNbCreneaux('09:00', '12:00', 60)).toBe(3);
   });
 
   test('OK - 08h00-13h00, 30min, sans pause - 10 creneaux', () => {
-    expect(calculerCreneaux('08:00', '13:00', 30)).toBe(10);
+    expect(calculerNbCreneaux('08:00', '13:00', 30)).toBe(10);
   });
 });

@@ -17,111 +17,25 @@ jest.mock('../../Backend/src/utils/socket', () => ({
   getIO: jest.fn(() => ({ to: jest.fn(() => ({ emit: jest.fn() })) })),
 }));
 
-// ─── Fonctions pures extraites pour test ─────────────────────────────────────
+// ─── Import depuis le vrai fichier backend (génère la couverture réelle) ──────
+const {
+  seChevauchent,
+  validerTelephone,
+  formatDuree,
+  formatDateLocale,
+  estJourOuvrable,
+  trierFile,
+  verifierAnnulationRDV,
+  genererCreneauxPourJour,
+} = require('../../Backend/src/utils/business-logic');
 
-/**
- * Détecte si deux créneaux horaires se chevauchent.
- * Critique pour prévenir les doubles réservations.
- */
-function seChevauchent(slot1, slot2) {
-  const toMin = (h) => {
-    const [hh, mm] = h.split(':').map(Number);
-    return hh * 60 + mm;
-  };
-  const d1 = toMin(slot1.heure_debut), f1 = toMin(slot1.heure_fin);
-  const d2 = toMin(slot2.heure_debut), f2 = toMin(slot2.heure_fin);
-  // Chevauchement si : début1 < fin2 ET fin1 > début2
-  return d1 < f2 && f1 > d2;
-}
-
-/**
- * Valide un numéro de téléphone tunisien.
- * Règles : 8 chiffres, commence par 2, 5, 7, 9 (fixes/mobiles valides).
- */
-function validerTelephone(tel) {
-  if (!tel) return false;
-  const clean = tel.replace(/\s+/g, '').replace(/[^\d]/g, '');
-  if (clean.length !== 8) return false;
-  return /^[2579]\d{7}$/.test(clean);
-}
-
-/**
- * Formate une durée en minutes pour l'affichage.
- * Ex: 30 → "30 min", 60 → "1h", 90 → "1h30", 120 → "2h"
- */
-function formatDuree(minutes) {
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (m === 0) return `${h}h`;
-  return `${h}h${String(m).padStart(2, '0')}`;
-}
-
-/**
- * Formate une date locale sans décalage UTC (fix du bug timezone calendrier).
- * Utilise getFullYear/getMonth/getDate pour éviter le décalage UTC+1.
- */
-function formatDateLocale(date) {
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-/**
- * Vérifie si un jour donné est ouvrable selon la config du service.
- */
-function estJourOuvrable(date, joursActifs) {
-  const noms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-  const nomJour = noms[date.getDay()];
-  return joursActifs.includes(nomJour);
-}
-
-/**
- * Trie les tickets d'une file par numéro (ordre FIFO).
- */
-function trierFile(tickets) {
-  return [...tickets].sort((a, b) => a.numero - b.numero);
-}
-
-/**
- * Détermine si un RDV peut encore être annulé (règle : > 24h avant).
- * Identique à la règle dans utils.test.js mais cette version renvoie aussi
- * un message explicatif.
- */
-function verifierAnnulationRDV(dateRdv, maintenant = new Date()) {
-  const diffMs    = new Date(dateRdv) - maintenant;
-  const diffH     = diffMs / (1000 * 60 * 60);
-  if (diffH <= 0)  return { autorise: false, raison: 'Le rendez-vous est déjà passé.' };
-  if (diffH <= 24) return { autorise: false, raison: 'Annulation impossible moins de 24h avant le RDV.' };
-  return { autorise: true, raison: null };
-}
-
-/**
- * Génère les créneaux pour une journée en excluant les jours non actifs.
- * Retourne [] si le jour n'est pas dans jours_actifs.
- */
-function genererCreneauxPourJour(date, config) {
-  const noms = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-  const nomJour = noms[date.getDay()];
-  if (!config.jours_actifs.includes(nomJour)) return [];
-
-  const toMin = (h) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm; };
-  const toH   = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-
-  const slots = [];
-  let cursor = toMin(config.heure_debut);
-  const fin  = toMin(config.heure_fin);
-
-  while (cursor + config.duree_creneau <= fin) {
-    slots.push({ heure_debut: toH(cursor), heure_fin: toH(cursor + config.duree_creneau) });
-    cursor += config.duree_creneau;
-  }
-  return slots;
-}
+const { withAllureLabels } = require('../setup/allure-labels');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SUITE 1 — Détection chevauchement de créneaux
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Détection chevauchement de créneaux', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Chevauchement Créneaux');
 
   test('OK — créneaux consécutifs sans chevauchement', () => {
     expect(seChevauchent(
@@ -170,6 +84,7 @@ describe('[CRITIQUE] Détection chevauchement de créneaux', () => {
 // SUITE 2 — Validation numéro de téléphone tunisien
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Validation numéro téléphone tunisien', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Téléphone Tunisien');
 
   test('OK — mobile 9x (Tunisie Telecom mobile)', () => {
     expect(validerTelephone('98765432')).toBe(true);
@@ -220,6 +135,7 @@ describe('[CRITIQUE] Validation numéro téléphone tunisien', () => {
 // SUITE 3 — Formatage durée créneau (affichage UI)
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Formatage durée créneau', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Formatage Durée');
 
   test('OK — 15 min → "15 min"', () => {
     expect(formatDuree(15)).toBe('15 min');
@@ -258,6 +174,7 @@ describe('[CRITIQUE] Formatage durée créneau', () => {
 // SUITE 4 — Formatage date locale (fix bug timezone UTC)
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Formatage date locale (anti-timezone bug)', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Date Locale Anti-Bug');
 
   test('OK — date simple retourne format YYYY-MM-DD', () => {
     const d = new Date(2026, 3, 22); // 22 avril 2026 (mois 3 = avril, base 0)
@@ -298,6 +215,7 @@ describe('[CRITIQUE] Formatage date locale (anti-timezone bug)', () => {
 // SUITE 5 — Vérification jour ouvrable
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Vérification jour ouvrable (config service)', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Jours Ouvrables');
 
   const joursActifs = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
 
@@ -336,6 +254,7 @@ describe('[CRITIQUE] Vérification jour ouvrable (config service)', () => {
 // SUITE 6 — Tri de la file d'attente (ordre FIFO)
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Tri file d\'attente FIFO (ordre des tickets)', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'FIFO File');
 
   const fileDesordre = [
     { _id: 'tk4', numero: 4, statut: 'en_attente' },
@@ -376,6 +295,7 @@ describe('[CRITIQUE] Tri file d\'attente FIFO (ordre des tickets)', () => {
 // SUITE 7 — Règle d'annulation RDV avec message explicatif
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Règle annulation RDV — message retourné au citoyen', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Règle Annulation');
 
   test('OK — RDV dans 48h → annulation autorisée, pas de message', () => {
     const rdv = new Date(Date.now() + 48 * 3600 * 1000);
@@ -409,6 +329,7 @@ describe('[CRITIQUE] Règle annulation RDV — message retourné au citoyen', ()
 // SUITE 8 — Génération créneaux avec exclusion jours non actifs
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('[CRITIQUE] Génération créneaux — exclusion jours non actifs', () => {
+  withAllureLabels('🔵 Tests Unitaires', 'Logique Métier RDV', 'Génération Créneaux');
 
   const config = {
     heure_debut: '09:00',
