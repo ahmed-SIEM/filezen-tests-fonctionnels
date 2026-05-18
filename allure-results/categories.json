@@ -1,0 +1,24 @@
+[
+  {
+    "name": "✅ Tests Réussis",
+    "matchedStatuses": ["passed"]
+  },
+  {
+    "name": "❌ Bugs Produit (assertions échouées)",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*AssertionError.*|.*expect.*received.*"
+  },
+  {
+    "name": "⚠️ Limitations Infrastructure CI",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*libglib.*|.*ECONNREFUSED.*|.*MongoDB.*|.*timeout.*|.*net::ERR.*"
+  },
+  {
+    "name": "🔴 Tests Cassés (erreurs techniques)",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "⏭️ Tests Ignorés",
+    "matchedStatuses": ["skipped"]
+  }
+]
