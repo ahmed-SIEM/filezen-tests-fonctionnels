@@ -97,43 +97,32 @@ async function injectSession(page, role = 'citoyen', extras = {}) {
     ...extras,
   };
 
-  // Supprimer les anciens mocks auth pour ce changement de rôle
+  // Supprimer les anciens mocks auth
   await page.unroute(`${API}/api/auth/me*`).catch(() => {});
   await page.unroute(`${API}/api/notifications*`).catch(() => {});
 
-  // Nouveau mock auth/me pour ce rôle
+  // Mock auth/me — retourne toujours l'utilisateur courant
   await page.route(`${API}/api/auth/me*`, r =>
     r.fulfill({ status: 200, contentType: 'application/json',
       body: JSON.stringify({ success: true, data: user }) }));
 
-  // Mock notifications (évite les 401 en background)
+  // Mock notifications (évite 401 en background)
   await page.route(`${API}/api/notifications*`, r =>
     r.fulfill({ status: 200, contentType: 'application/json',
       body: JSON.stringify({ success: true, data: [], non_lues: 0 }) }));
 
-  // addInitScript : s'exécute AVANT React sur chaque nouvelle navigation
-  // Garantit que le token est là avant le check d'auth de l'app
+  // addInitScript : injecte le token AVANT que React s'exécute
+  // S'accumule intentionnellement — le dernier appel écrase le précédent
   await page.addInitScript(({ token, userData }) => {
-    try {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch(_) {}
+    window.localStorage.setItem('token', token);
+    window.localStorage.setItem('user', JSON.stringify(userData));
   }, { token: MOCK_TOKEN, userData: user });
 
-  // Naviguer vers /login UNIQUEMENT si aucune page n'est chargée
-  // Sinon, l'initScript s'appliquera automatiquement sur le prochain goto() du test
-  const currentUrl = page.url();
-  if (!currentUrl || currentUrl === 'about:blank') {
-    await page.goto(`${FRONT}/login`);
-    await page.waitForTimeout(300);
-  }
-  // Pour un changement de rôle : on met aussi à jour localStorage immédiatement
-  // au cas où React lit depuis le storage sans renavigation
+  // Mettre à jour localStorage sur la page actuelle si déjà chargée
+  // NE PAS naviguer vers /login — ça déclenche des effets de bord en CI
   await page.evaluate(({ token, userData }) => {
-    try {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch(_) {}
+    window.localStorage.setItem('token', token);
+    window.localStorage.setItem('user', JSON.stringify(userData));
   }, { token: MOCK_TOKEN, userData: user }).catch(() => {});
 }
 
