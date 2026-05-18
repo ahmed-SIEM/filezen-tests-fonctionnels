@@ -11,7 +11,13 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
 
 // ─── Protection des routes agents ────────────────────────────────────────────
-test.describe('AGENTS API — Protection des routes (acces non autorise)', () => {
+
+test.describe('AGENTS API — Protection des routes (acces non autorise)', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Agents API' },
+  ],
+}, () => {
 
   test('[AGT-001] POST /agents sans token → 401', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/agents`, {
@@ -48,7 +54,12 @@ test.describe('AGENTS API — Protection des routes (acces non autorise)', () =>
 });
 
 // ─── Protection des routes tickets agent ─────────────────────────────────────
-test.describe('AGENTS API — Routes tickets agent protegees', () => {
+test.describe('AGENTS API — Routes tickets agent protegees', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Agents API' },
+  ],
+}, () => {
 
   test('[AGT-006] GET /tickets/agent/file sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/tickets/agent/file`);
@@ -77,7 +88,12 @@ test.describe('AGENTS API — Routes tickets agent protegees', () => {
 });
 
 // ─── Format des erreurs ───────────────────────────────────────────────────────
-test.describe('AGENTS API — Format des erreurs', () => {
+test.describe('AGENTS API — Format des erreurs', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Agents API' },
+  ],
+}, () => {
 
   test('[AGT-011] Toutes les erreurs 401 ont success:false et message', async ({ request }) => {
     const routes = [

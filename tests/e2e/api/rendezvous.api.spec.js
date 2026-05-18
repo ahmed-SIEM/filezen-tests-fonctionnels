@@ -11,7 +11,13 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
 
 // ─── Routes protegees citoyen ────────────────────────────────────────────────
-test.describe('RENDEZ-VOUS API — Routes citoyen protegees', () => {
+
+test.describe('RENDEZ-VOUS API — Routes citoyen protegees', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Rendez-vous API' },
+  ],
+}, () => {
 
   test('[RDV-001] POST /rendezvous sans token → 401', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/rendezvous`, {
@@ -44,7 +50,12 @@ test.describe('RENDEZ-VOUS API — Routes citoyen protegees', () => {
 });
 
 // ─── Routes agent protegees ───────────────────────────────────────────────────
-test.describe('RENDEZ-VOUS API — Routes agent protegees', () => {
+test.describe('RENDEZ-VOUS API — Routes agent protegees', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Rendez-vous API' },
+  ],
+}, () => {
 
   test('[RDV-006] GET /rendezvous/agent/jour sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/rendezvous/agent/jour`);
@@ -73,7 +84,12 @@ test.describe('RENDEZ-VOUS API — Routes agent protegees', () => {
 });
 
 // ─── Routes admin protegees ───────────────────────────────────────────────────
-test.describe('RENDEZ-VOUS API — Routes admin protegees', () => {
+test.describe('RENDEZ-VOUS API — Routes admin protegees', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Rendez-vous API' },
+  ],
+}, () => {
 
   test('[RDV-011] PUT /rendezvous/service/:id/config sans token → 401', async ({ request }) => {
     const res = await request.put(`${BASE_URL}/rendezvous/service/507f1f77bcf86cd799439011/config`);
@@ -87,7 +103,12 @@ test.describe('RENDEZ-VOUS API — Routes admin protegees', () => {
 });
 
 // ─── Validation entrees — creneaux vides ─────────────────────────────────────
-test.describe('RENDEZ-VOUS API — Regles metier (validation)', () => {
+test.describe('RENDEZ-VOUS API — Regles metier (validation)', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Rendez-vous API' },
+  ],
+}, () => {
 
   test('[RDV-013] Reponse creneaux disponibles sans serviceId → 400 avec token invalid', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/rendezvous/creneaux`, {

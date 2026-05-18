@@ -23,7 +23,13 @@ async function obtenirTokenCitoyen(request) {
 }
 
 // ─── Routes publiques services ────────────────────────────────────────────────
-test.describe('SERVICES API — Routes publiques', () => {
+
+test.describe('SERVICES API — Routes publiques', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Services API' },
+  ],
+}, () => {
 
   test('[SVC-001] GET /etablissements — liste publique accessible sans token', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements`);
@@ -53,7 +59,12 @@ test.describe('SERVICES API — Routes publiques', () => {
 });
 
 // ─── Protection des routes admin ─────────────────────────────────────────────
-test.describe('SERVICES API — Protection des routes admin', () => {
+test.describe('SERVICES API — Protection des routes admin', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Services API' },
+  ],
+}, () => {
 
   test('[SVC-005] POST /services sans token → 401', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/services`, {
@@ -96,7 +107,12 @@ test.describe('SERVICES API — Protection des routes admin', () => {
 });
 
 // ─── Format reponses API ──────────────────────────────────────────────────────
-test.describe('SERVICES API — Format des reponses', () => {
+test.describe('SERVICES API — Format des reponses', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Services API' },
+  ],
+}, () => {
 
   test('[SVC-011] Reponse liste etablissements contient success + data + count', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements`);

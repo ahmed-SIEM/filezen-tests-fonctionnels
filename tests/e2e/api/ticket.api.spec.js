@@ -29,6 +29,7 @@ const seConnecter = async (request, email, motDePasse) => {
 const authHeaders = (token) => ({ Authorization: `Bearer ${token}` });
 
 // ─── Tests tickets ────────────────────────────────────────────────────────────
+
 test.describe('TICKETS API — Gestion de la file d\'attente', () => {
 
   test('❌ [TKT-001] Prise de ticket sans authentification → 401', async ({ request }) => {
@@ -72,7 +73,12 @@ test.describe('TICKETS API — Gestion de la file d\'attente', () => {
 });
 
 // ─── Tests établissements API ─────────────────────────────────────────────────
-test.describe('ETABLISSEMENTS API — Accès public et filtres', () => {
+test.describe('ETABLISSEMENTS API — Accès public et filtres', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Tickets API' },
+  ],
+}, () => {
 
   test('✅ [ETAB-001] Liste publique accessible sans token', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements`);
@@ -107,7 +113,12 @@ test.describe('ETABLISSEMENTS API — Accès public et filtres', () => {
 });
 
 // ─── Tests services API ───────────────────────────────────────────────────────
-test.describe('SERVICES API — Accès protégé', () => {
+test.describe('SERVICES API — Accès protégé', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Tickets API' },
+  ],
+}, () => {
 
   test('❌ [SVC-001] Création service sans token → 401', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/services`, {
@@ -122,7 +133,12 @@ test.describe('SERVICES API — Accès protégé', () => {
 });
 
 // ─── Tests notifications API ──────────────────────────────────────────────────
-test.describe('NOTIFICATIONS API — Accès protégé', () => {
+test.describe('NOTIFICATIONS API — Accès protégé', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Tickets API' },
+  ],
+}, () => {
 
   test('❌ [NOTIF-001] Liste notifications sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/notifications`);

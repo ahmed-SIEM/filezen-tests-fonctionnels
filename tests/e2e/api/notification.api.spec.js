@@ -11,7 +11,13 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
 
 // ─── Protection des routes notifications ─────────────────────────────────────
-test.describe('NOTIFICATIONS API — Protection (non authentifie)', () => {
+
+test.describe('NOTIFICATIONS API — Protection (non authentifie)', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Notifications API' },
+  ],
+}, () => {
 
   test('[NOTIF-001] GET /notifications sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/notifications`);
@@ -37,7 +43,12 @@ test.describe('NOTIFICATIONS API — Protection (non authentifie)', () => {
 });
 
 // ─── Token invalide ───────────────────────────────────────────────────────────
-test.describe('NOTIFICATIONS API — Token invalide', () => {
+test.describe('NOTIFICATIONS API — Token invalide', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Notifications API' },
+  ],
+}, () => {
 
   test('[NOTIF-005] GET /notifications avec token falsifie → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/notifications`, {
@@ -55,7 +66,12 @@ test.describe('NOTIFICATIONS API — Token invalide', () => {
 });
 
 // ─── Format des reponses ──────────────────────────────────────────────────────
-test.describe('NOTIFICATIONS API — Format des reponses', () => {
+test.describe('NOTIFICATIONS API — Format des reponses', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Notifications API' },
+  ],
+}, () => {
 
   test('[NOTIF-007] Toutes les erreurs 401 ont la structure standard', async ({ request }) => {
     const routes = [

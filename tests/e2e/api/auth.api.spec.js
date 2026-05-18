@@ -15,7 +15,13 @@ const emailUnique = (prefix = 'test') =>
   `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}@filezen.test`;
 
 // ─── Flux AUTH complet ────────────────────────────────────────────────────────
-test.describe('AUTH API — Flux complet inscription → connexion', () => {
+
+test.describe('AUTH API — Flux complet inscription → connexion', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Auth API' },
+  ],
+}, () => {
 
   test('✅ [AUTH-001] Inscription citoyen valide → 201', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/auth/signup/citoyen`, {
@@ -100,7 +106,12 @@ test.describe('AUTH API — Flux complet inscription → connexion', () => {
 });
 
 // ─── Protection des routes par rôle ──────────────────────────────────────────
-test.describe('AUTH API — Protection des routes par rôle', () => {
+test.describe('AUTH API — Protection des routes par rôle', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Auth API' },
+  ],
+}, () => {
 
   test('❌ [AUTH-007] Route super_admin inaccessible sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements/en-attente`);
@@ -119,7 +130,12 @@ test.describe('AUTH API — Protection des routes par rôle', () => {
 });
 
 // ─── Vérification email ───────────────────────────────────────────────────────
-test.describe('AUTH API — Vérification email', () => {
+test.describe('AUTH API — Vérification email', {
+  annotation: [
+    { type: 'epic',    value: '🟠 Tests E2E API' },
+    { type: 'feature', value: 'Auth API' },
+  ],
+}, () => {
 
   test('❌ [AUTH-010] Code de vérification incorrect → 400', async ({ request }) => {
     // D'abord inscrire un utilisateur
