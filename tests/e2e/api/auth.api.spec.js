@@ -7,6 +7,7 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { epic: _epic, feature: _feature } = require('allure-js-commons');
 
 const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
 
@@ -16,12 +17,12 @@ const emailUnique = (prefix = 'test') =>
 
 // ─── Flux AUTH complet ────────────────────────────────────────────────────────
 
-test.describe('AUTH API — Flux complet inscription → connexion', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Auth API' },
-  ],
-}, () => {
+test.describe('AUTH API — Flux complet inscription → connexion', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Auth API');
+  });
 
   test('✅ [AUTH-001] Inscription citoyen valide → 201', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/auth/signup/citoyen`, {
@@ -106,12 +107,12 @@ test.describe('AUTH API — Flux complet inscription → connexion', {
 });
 
 // ─── Protection des routes par rôle ──────────────────────────────────────────
-test.describe('AUTH API — Protection des routes par rôle', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Auth API' },
-  ],
-}, () => {
+test.describe('AUTH API — Protection des routes par rôle', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Auth API');
+  });
 
   test('❌ [AUTH-007] Route super_admin inaccessible sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements/en-attente`);
@@ -130,12 +131,12 @@ test.describe('AUTH API — Protection des routes par rôle', {
 });
 
 // ─── Vérification email ───────────────────────────────────────────────────────
-test.describe('AUTH API — Vérification email', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Auth API' },
-  ],
-}, () => {
+test.describe('AUTH API — Vérification email', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Auth API');
+  });
 
   test('❌ [AUTH-010] Code de vérification incorrect → 400', async ({ request }) => {
     // D'abord inscrire un utilisateur

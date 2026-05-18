@@ -7,6 +7,7 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { epic: _epic, feature: _feature } = require('allure-js-commons');
 
 const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
 
@@ -28,13 +29,17 @@ const authHeaders = (token) => ({ Authorization: `Bearer ${token}` });
 // ─── Routes publiques ─────────────────────────────────────────────────────────
 
 
-test.describe('ÉTABLISSEMENTS API — Routes publiques', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Établissements API' },
-    { type: 'story',   value: 'Routes Publiques' },
-  ],
-}, () => {
+test.describe('ÉTABLISSEMENTS API — Routes publiques', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+
 
   test('✅ [ETAB-001] GET /etablissements — liste publique sans token → 200', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements`);
@@ -76,13 +81,17 @@ test.describe('ÉTABLISSEMENTS API — Routes publiques', {
 
 // ─── Protection des routes ────────────────────────────────────────────────────
 
-test.describe('ÉTABLISSEMENTS API — Protection des routes', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Établissements API' },
-    { type: 'story',   value: 'Contrôle d\'Accès' },
-  ],
-}, () => {
+test.describe('ÉTABLISSEMENTS API — Protection des routes', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+
 
   test('❌ [ETAB-005] GET /etablissements/admin sans token → 401 ou 404', async ({ request }) => {
     // BUG CONNU : retourne 500 — middleware auth non appliqué (voir bugs-detectes-par-tests.md)
@@ -114,13 +123,17 @@ test.describe('ÉTABLISSEMENTS API — Protection des routes', {
 
 // ─── Signalement citoyen ──────────────────────────────────────────────────────
 
-test.describe('ÉTABLISSEMENTS API — Signalement citoyen', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Établissements API' },
-    { type: 'story',   value: 'Signalement' },
-  ],
-}, () => {
+test.describe('ÉTABLISSEMENTS API — Signalement citoyen', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+
 
   test('❌ [ETAB-009] POST /etablissements/:id/signaler sans token → 401', async ({ request }) => {
     const res = await request.post(`${BASE_URL}/etablissements/000000000000000000000000/signaler`, {
@@ -137,13 +150,17 @@ test.describe('ÉTABLISSEMENTS API — Signalement citoyen', {
 
 // ─── Validation SuperAdmin ────────────────────────────────────────────────────
 
-test.describe('ÉTABLISSEMENTS API — Validation SuperAdmin', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Établissements API' },
-    { type: 'story',   value: 'Validation SuperAdmin' },
-  ],
-}, () => {
+test.describe('ÉTABLISSEMENTS API — Validation SuperAdmin', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Etablissements API');
+  });
+
 
   test('✅ [ETAB-011] GET /etablissements/admin avec token superadmin → 200', async ({ request }) => {
     const token = await obtenirTokenSuperAdmin(request);

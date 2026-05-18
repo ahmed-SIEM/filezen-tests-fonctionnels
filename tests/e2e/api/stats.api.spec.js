@@ -7,17 +7,18 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { epic: _epic, feature: _feature } = require('allure-js-commons');
 
 const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
 
 // ─── Protection des routes stats etablissement ───────────────────────────────
 
-test.describe('STATS API — Dashboard etablissement protege', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Statistiques API' },
-  ],
-}, () => {
+test.describe('STATS API — Dashboard etablissement protege', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Statistiques API');
+  });
 
   test('[STATS-001] GET /stats/etablissement/:id/dashboard sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/stats/etablissement/507f1f77bcf86cd799439011/dashboard`);
@@ -40,12 +41,12 @@ test.describe('STATS API — Dashboard etablissement protege', {
 });
 
 // ─── Protection des routes stats plateforme ──────────────────────────────────
-test.describe('STATS API — Dashboard plateforme super admin protege', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Statistiques API' },
-  ],
-}, () => {
+test.describe('STATS API — Dashboard plateforme super admin protege', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Statistiques API');
+  });
 
   test('[STATS-004] GET /stats/plateforme/dashboard sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/stats/plateforme/dashboard`);
@@ -63,12 +64,12 @@ test.describe('STATS API — Dashboard plateforme super admin protege', {
 });
 
 // ─── Format des reponses d erreur ────────────────────────────────────────────
-test.describe('STATS API — Format standard des erreurs', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Statistiques API' },
-  ],
-}, () => {
+test.describe('STATS API — Format standard des erreurs', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Statistiques API');
+  });
 
   test('[STATS-006] Toutes les routes stats retournent success:false + message en cas 401', async ({ request }) => {
     const routes = [
@@ -95,12 +96,12 @@ test.describe('STATS API — Format standard des erreurs', {
 });
 
 // ─── Routes etablissements (liees aux stats) ─────────────────────────────────
-test.describe('STATS API — Routes etablissements liees', {
-  annotation: [
-    { type: 'epic',    value: '🟠 Tests E2E API' },
-    { type: 'feature', value: 'Statistiques API' },
-  ],
-}, () => {
+test.describe('STATS API — Routes etablissements liees', () => {
+
+  test.beforeEach(async () => {
+    await _epic('🟠 Tests E2E API');
+    await _feature('Statistiques API');
+  });
 
   test('[STATS-008] GET /etablissements/en-attente sans token → 401', async ({ request }) => {
     const res = await request.get(`${BASE_URL}/etablissements/en-attente`);

@@ -20,8 +20,10 @@ const { test, expect } = require('@playwright/test');
 const FRONT = process.env.FRONTEND_URL || 'http://localhost:5173';
 const API   = process.env.API_URL       || 'http://localhost:5000';
 
-const WAIT  = 5000;
-const SHORT = 2000;
+// Timeouts adaptés CI vs local
+const IS_CI = !!process.env.CI || !!process.env.JENKINS_URL;
+const WAIT  = IS_CI ? 15000 : 5000;
+const SHORT = IS_CI ? 5000  : 2000;
 
 // ─── Allure ───────────────────────────────────────────────────────────────────
 const { epic: _epic, feature: _feature, story: _story } = require('allure-js-commons');
@@ -118,12 +120,20 @@ async function injectSession(page, role = 'citoyen', extras = {}) {
     window.localStorage.setItem('user', JSON.stringify(userData));
   }, { token: MOCK_TOKEN, userData: user });
 
-  // Mettre à jour localStorage sur la page actuelle si déjà chargée
-  // NE PAS naviguer vers /login — ça déclenche des effets de bord en CI
-  await page.evaluate(({ token, userData }) => {
-    window.localStorage.setItem('token', token);
-    window.localStorage.setItem('user', JSON.stringify(userData));
-  }, { token: MOCK_TOKEN, userData: user }).catch(() => {});
+  // Mettre à jour localStorage sur la page actuelle si une vraie page est chargée
+  // (about:blank et data: bloquent localStorage → SecurityError)
+  const currentUrl = page.url();
+  const pageReady = currentUrl
+    && currentUrl !== 'about:blank'
+    && !currentUrl.startsWith('data:')
+    && !currentUrl.startsWith('chrome-error:');
+
+  if (pageReady) {
+    await page.evaluate(({ token, userData }) => {
+      window.localStorage.setItem('token', token);
+      window.localStorage.setItem('user', JSON.stringify(userData));
+    }, { token: MOCK_TOKEN, userData: user }).catch(() => {});
+  }
 }
 
 // ─── Helpers mocks communs ────────────────────────────────────────────────────
